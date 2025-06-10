@@ -1,6 +1,6 @@
 ﻿namespace CodeFirstTemplate.Exceptions;
 
-public class IdExistsException : Exception
+public class ConflictException : Exception
 {
     
 }
