@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.DTOs;
 using WebApplication1.Models;
 using WebApplication1.Services;
 
@@ -20,9 +21,25 @@ namespace Colos.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCharacters(int id)
         {
-            var data = await _dbService.GetCharacterByIdAsync(id);
-            
-            return Ok(data);
+            try
+            {
+                var data = await _dbService.GetCharacterByIdAsync(id);
+
+                return Ok(data);
+            }
+            catch
+            {
+                return NotFound();
+            }
+        }
+
+
+
+        [HttpPost("{id}/backpacks")]
+        public async Task<IActionResult> AddItem(List<NewItemDto> newItems, int id)
+        {
+            await _dbService.AddNewItems(newItems, id );
+            return Created();
         }
     }
 }

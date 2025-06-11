@@ -29,7 +29,7 @@ public class DbService : IDbService
 
         if (data == null)
         {
-            throw new NoFoundException();
+            throw new NoFoundException("Character not found");
         }
 
         var dto = new GetCharacterDto
@@ -51,9 +51,58 @@ public class DbService : IDbService
             }).ToList()
             
         };
-
-
+        
         return dto;
 
+    }
+
+    public async Task AddNewItems(List<NewItemDto> newItems, int id)
+    {
+        
+        var character = _dbContext.Characters.FirstOrDefault(w => w.Id == id);
+
+        if (character == null)
+        {
+            throw new NoFoundException("Character not found");
+        }
+
+
+        foreach (var newItem in newItems)
+        {
+            var item = _dbContext.Items.FirstOrDefault(w => w.Id == newItem.ItemId);
+
+            if (item == null)
+            {
+                throw new NoFoundException("Item not found");
+            }
+        }
+        
+        
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        
+        try
+        {
+
+            foreach (var newItem in newItems)
+            {
+
+                var newBackpack = new Backpack
+                {
+                    CharacterId = id,
+                    ItemId = newItem.ItemId,
+                };
+                
+                await _dbContext.Backpacks.AddAsync(newBackpack);
+            }
+
+
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }

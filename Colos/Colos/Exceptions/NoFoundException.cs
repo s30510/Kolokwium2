@@ -1,6 +1,6 @@
 ﻿namespace CodeFirstTemplate.Exceptions;
 
-public class NoFoundException : Exception
+public class NoFoundException(string characterNotFound) : Exception
 {
     
 }
