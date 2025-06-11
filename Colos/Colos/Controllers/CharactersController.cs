@@ -1,3 +1,4 @@
+using CodeFirstTemplate.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.DTOs;
@@ -36,10 +37,25 @@ namespace Colos.Controllers
 
 
         [HttpPost("{id}/backpacks")]
-        public async Task<IActionResult> AddItem(List<NewItemDto> newItems, int id)
+        public async Task<IActionResult> AddItem(List<int> newItems, int id)
         {
-            await _dbService.AddNewItems(newItems, id );
-            return Created();
-        }
+            try
+            {
+                await _dbService.AddNewItems(newItems, id);
+                return Created();
+            }
+            catch (OverweightException e)
+            {
+                return Conflict(e.Message);
+            }
+            catch (NoFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+    }
     }
 }

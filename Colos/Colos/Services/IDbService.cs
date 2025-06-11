@@ -6,5 +6,5 @@ public interface IDbService
 {
     Task<GetCharacterDto> GetCharacterByIdAsync(int id);
 
-    Task AddNewItems(List<NewItemDto> newItems, int id);
+    Task AddNewItems(List<int> newItems, int id);
 }

@@ -56,26 +56,21 @@ public class DbService : IDbService
 
     }
 
-    public async Task AddNewItems(List<NewItemDto> newItems, int id)
+    public async Task AddNewItems(List<int> newItems, int id)
     {
         
         var character = _dbContext.Characters.FirstOrDefault(w => w.Id == id);
+        
+        
 
         if (character == null)
         {
             throw new NoFoundException("Character not found");
         }
-
-
-        foreach (var newItem in newItems)
-        {
-            var item = _dbContext.Items.FirstOrDefault(w => w.Id == newItem.ItemId);
-
-            if (item == null)
-            {
-                throw new NoFoundException("Item not found");
-            }
-        }
+        
+        
+        int currentWeight = character.CurrentWeight;
+        int maxWeight = character.MaxWeight;
         
         
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -85,16 +80,35 @@ public class DbService : IDbService
 
             foreach (var newItem in newItems)
             {
+                
+                var item = _dbContext.Items.FirstOrDefault(w => w.Id == newItem);
+                
+                if (item == null)
+                {
+                    throw new NoFoundException("Item not found");
+                }
+                
+                currentWeight += item.Weight;
+
+
+                if (currentWeight > maxWeight)
+                {
+                    throw new OverweightException();
+                }
 
                 var newBackpack = new Backpack
                 {
                     CharacterId = id,
-                    ItemId = newItem.ItemId,
+                    ItemId = newItem,
                 };
                 
+                
+                character.CurrentWeight = currentWeight;
+                
                 await _dbContext.Backpacks.AddAsync(newBackpack);
+                
+                
             }
-
 
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
